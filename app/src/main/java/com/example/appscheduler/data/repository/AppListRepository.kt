@@ -15,8 +15,8 @@ class AppListRepository(private val context: Context) {
         return packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
             .filter { app ->
                 val isSystemApp = app.flags and ApplicationInfo.FLAG_SYSTEM != 0
-                val isCurrentApp = app.packageName.startsWith(OWN_PACKAGE_NAME)
-                !isSystemApp && !isCurrentApp
+                val isSelf = app.packageName.startsWith(OWN_PACKAGE_NAME)
+                !isSystemApp && !isSelf
             }
             .map { app ->
                 AppInfo(
