@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appscheduler.data.repository.AppListRepository
 import com.example.appscheduler.ui.screens.HomeScreen
 import com.example.appscheduler.ui.theme.AppSchedulerTheme
 import com.example.appscheduler.ui.viewmodels.AppListViewModel
-import com.example.appscheduler.ui.viewmodels.AppListViewModelFactory
+import com.example.appscheduler.ui.viewmodels.ScheduleViewModel
+import com.example.appscheduler.ui.viewmodels.ViewModelFactory
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,8 +26,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val factory = AppListViewModelFactory(AppListRepository(applicationContext))
-                    HomeScreen(ViewModelProvider(this, factory)[AppListViewModel::class.java])
+                    val appListViewModel = viewModel<AppListViewModel>(factory = ViewModelFactory(AppListRepository(this)))
+                    val scheduleViewModel = viewModel<ScheduleViewModel>(factory = ViewModelFactory(this))
+                    HomeScreen(appListViewModel, scheduleViewModel)
                 }
             }
         }

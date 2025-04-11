@@ -2,7 +2,6 @@ package com.example.appscheduler.ui.screens
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -16,9 +15,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -27,12 +31,25 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.appscheduler.data.model.AppInfo
 import com.example.appscheduler.ui.viewmodels.AppListViewModel
-import com.example.appscheduler.util.Constants.TAG
+import com.example.appscheduler.ui.viewmodels.ScheduleViewModel
 
 @Composable
-fun HomeScreen(appListViewModel: AppListViewModel) {
+fun HomeScreen(
+    appListViewModel: AppListViewModel,
+    scheduleViewModel: ScheduleViewModel
+) {
+    val context = LocalContext.current
+    var showDialog by remember { mutableStateOf(false) }
+    var selectedApp by remember { mutableStateOf<AppInfo?>(null) }
     val installedApps = appListViewModel.apps.collectAsState().value
-    Log.i(TAG, "Number of installed apps: ${installedApps.size}")
+
+    if (showDialog && selectedApp != null) {
+        ScheduleDialog(
+            app = selectedApp!!,
+            onDismiss = { showDialog = false },
+            viewModel = scheduleViewModel
+        )
+    }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
@@ -45,7 +62,11 @@ fun HomeScreen(appListViewModel: AppListViewModel) {
         ) { app ->
             AppCellItem(
                 app = app,
-                LocalContext.current
+                onScheduleClick = {
+                    selectedApp = app
+                    showDialog = true
+                },
+                context
             )
         }
     }
@@ -54,6 +75,7 @@ fun HomeScreen(appListViewModel: AppListViewModel) {
 @Composable
 fun AppCellItem(
     app: AppInfo,
+    onScheduleClick: () -> Unit,
     context: Context
 ) {
     Column(
@@ -72,6 +94,10 @@ fun AppCellItem(
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = app.name)
+        Spacer(modifier = Modifier.height(4.dp))
+        Button(onClick = onScheduleClick) {
+            Text(text = "Schedule")
+        }
     }
 }
 
