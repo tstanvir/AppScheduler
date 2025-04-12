@@ -1,4 +1,4 @@
-package com.example.appscheduler.ui.viewmodels
+package com.example.appscheduler.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

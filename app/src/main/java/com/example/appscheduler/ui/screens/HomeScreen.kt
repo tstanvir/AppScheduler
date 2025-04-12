@@ -30,8 +30,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.appscheduler.data.model.AppInfo
-import com.example.appscheduler.ui.viewmodels.AppListViewModel
-import com.example.appscheduler.ui.viewmodels.ScheduleViewModel
+import com.example.appscheduler.viewmodels.AppListViewModel
+import com.example.appscheduler.viewmodels.ScheduleViewModel
 
 @Composable
 fun HomeScreen(
@@ -39,9 +39,9 @@ fun HomeScreen(
     scheduleViewModel: ScheduleViewModel
 ) {
     val context = LocalContext.current
+    val installedApps = appListViewModel.apps.collectAsState().value
     var showDialog by remember { mutableStateOf(false) }
     var selectedApp by remember { mutableStateOf<AppInfo?>(null) }
-    val installedApps = appListViewModel.apps.collectAsState().value
 
     if (showDialog && selectedApp != null) {
         ScheduleDialog(
@@ -91,12 +91,12 @@ fun AppCellItem(
                 modifier = Modifier.size(48.dp)
                     .clickable { onAppClicked(app.packageName, context) }
             )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = app.name)
-        Spacer(modifier = Modifier.height(4.dp))
-        Button(onClick = onScheduleClick) {
-            Text(text = "Schedule")
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = app.name)
+            Spacer(modifier = Modifier.height(4.dp))
+            Button(onClick = onScheduleClick) {
+                Text(text = "Schedule")
+            }
         }
     }
 }
