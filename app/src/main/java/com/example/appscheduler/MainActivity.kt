@@ -1,6 +1,8 @@
 package com.example.appscheduler
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +24,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        checkOverlayPermission()
+
         setContent {
             AppSchedulerTheme {
                 Surface(
@@ -35,6 +39,13 @@ class MainActivity : ComponentActivity() {
                     HomeScreen(appListViewModel, scheduleViewModel)
                 }
             }
+        }
+    }
+
+    private fun checkOverlayPermission() {
+        if (!Settings.canDrawOverlays(this)) {
+            val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+            startActivity(myIntent)
         }
     }
 }
