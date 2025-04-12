@@ -40,8 +40,9 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         val json = sharedPreferences.getString(KEY_PREF_SCHEDULES, "") ?: ""
         val type = object : TypeToken<List<Schedule>>() {}.type
         _schedules.value = gson.fromJson(json, type) ?: emptyList()
-        for (value in _schedules.value) {
-            println("$TAG -> ${value.packageName}       ${value.id}")
+
+        _schedules.value.forEach { schedule ->
+            println("$TAG -> ${schedule.packageName}       ${schedule.id}")
         }
     }
 
