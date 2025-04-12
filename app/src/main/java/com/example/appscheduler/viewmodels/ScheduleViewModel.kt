@@ -1,4 +1,4 @@
-package com.example.appscheduler.ui.viewmodels
+package com.example.appscheduler.viewmodels
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -9,7 +9,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appscheduler.data.model.Schedule
-import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.receivers.AppLauncherReceiver
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
 import com.example.appscheduler.util.Constants.KEY_SCHEDULE
@@ -18,6 +17,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -27,6 +28,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     private val _schedules = MutableStateFlow<List<Schedule>>(emptyList())
+    val schedules: StateFlow<List<Schedule>> = _schedules.asStateFlow()
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -39,7 +41,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         val type = object : TypeToken<List<Schedule>>() {}.type
         _schedules.value = gson.fromJson(json, type) ?: emptyList()
         for (value in _schedules.value) {
-            println("$TAG -> ${value.packageName}")
+            println("$TAG -> ${value.packageName}       ${value.id}")
         }
     }
 
@@ -51,29 +53,34 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
     fun scheduleApp(schedule: Schedule) {
         Log.i(TAG, "${schedule.packageName} is scheduled at ${Date(schedule.scheduledTime)}")
 
-        val newSchedule = Schedule(
-            packageName = schedule.packageName,
-            scheduledTime = schedule.scheduledTime,
-            state = ScheduleState.SCHEDULED
-        )
-
-        _schedules.value = _schedules.value.filter { it.packageName != schedule.packageName } + newSchedule
+        _schedules.value += schedule
         saveSchedules()
 
-        val intent = Intent(context, AppLauncherReceiver::class.java).apply {
-            putExtra("schedule", schedule)
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            schedule.packageName.hashCode(),
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
+        val pendingIntent = getPendingIntent(schedule, true)
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
             schedule.scheduledTime,
-            pendingIntent
+            pendingIntent!!
+        )
+    }
+
+    private fun getPendingIntent(
+        schedule: Schedule?,
+        toSchedule: Boolean
+    ): PendingIntent? {
+        val intent = Intent(context, AppLauncherReceiver::class.java)
+        var flags = PendingIntent.FLAG_IMMUTABLE
+
+        if (toSchedule) {
+            intent.putExtra("schedule", schedule)
+            flags = flags or PendingIntent.FLAG_UPDATE_CURRENT
+        }
+
+        return PendingIntent.getBroadcast(
+            context,
+            schedule?.id.hashCode(),
+            intent,
+            flags
         )
     }
 }

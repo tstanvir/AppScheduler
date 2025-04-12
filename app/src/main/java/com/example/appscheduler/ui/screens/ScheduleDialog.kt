@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.appscheduler.data.model.AppInfo
 import com.example.appscheduler.data.model.Schedule
-import com.example.appscheduler.ui.viewmodels.ScheduleViewModel
+import com.example.appscheduler.viewmodels.ScheduleViewModel
 import java.util.Calendar
 
 @Composable
