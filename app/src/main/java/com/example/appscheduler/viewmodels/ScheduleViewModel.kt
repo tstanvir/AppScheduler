@@ -61,7 +61,9 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
 
     fun scheduleApp(schedule: Schedule) {
         Log.i(TAG, "${schedule.packageName} is scheduled at ${Date(schedule.scheduledTime)}")
-
+        if (AppStateRepository.appStates.value[schedule.packageName] == ScheduleState.SCHEDULED) {
+            cancelSchedule(ScheduleRepository.getLatestSchedule(schedule.packageName))
+        }
         schedules += schedule
         saveSchedules()
 
