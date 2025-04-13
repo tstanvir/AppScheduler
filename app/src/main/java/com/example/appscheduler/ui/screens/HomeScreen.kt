@@ -2,8 +2,12 @@ package com.example.appscheduler.ui.screens
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,9 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.appscheduler.data.model.AppInfo
+import com.example.appscheduler.data.repository.AppStateRepository
+import com.example.appscheduler.util.Constants.TAG
 import com.example.appscheduler.viewmodels.AppListViewModel
 import com.example.appscheduler.viewmodels.ScheduleViewModel
 
@@ -76,7 +85,9 @@ fun HomeScreen(
 fun AppCellItem(
     app: AppInfo,
     onScheduleClick: () -> Unit,
-    context: Context
+    context: Context,
+    cornerAlignment: Alignment = Alignment.TopEnd,
+    indicatorPadding: Dp = 4.dp
 ) {
     Column(
         modifier = Modifier
@@ -85,12 +96,22 @@ fun AppCellItem(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (app.icon != null) {
-            Image(
-                bitmap = app.icon.toBitmap().asImageBitmap(),
-                contentDescription = app.name,
-                modifier = Modifier.size(48.dp)
-                    .clickable { onAppClicked(app.packageName, context) }
-            )
+            Box(modifier = Modifier) {
+                Image(
+                    bitmap = app.icon.toBitmap().asImageBitmap(),
+                    contentDescription = app.name,
+                    modifier = Modifier.size(48.dp)
+                        .clickable { onAppClicked(app.packageName, context) }
+                )
+
+                Box(
+                    modifier = Modifier
+                        .align(cornerAlignment)
+                        .padding(indicatorPadding)
+                ) {
+                    AppStateIndicator(packageName = app.packageName)
+                }
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = app.name)
             Spacer(modifier = Modifier.height(4.dp))
@@ -99,6 +120,27 @@ fun AppCellItem(
             }
         }
     }
+}
+
+@Composable
+fun AppStateIndicator(packageName: String) {
+    val appStates = AppStateRepository.appStates.collectAsState().value
+    val appState = appStates[packageName]!!
+    Log.i(TAG, "state: $appState for package: $packageName with color: ${appState.color}")
+
+    Box(
+        modifier = Modifier
+            .size(16.dp)
+            .background(
+                color = appState.color,
+                shape = CircleShape
+            )
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.surface,
+                shape = CircleShape
+            )
+    )
 }
 
 fun onAppClicked(packageName: String, context: Context) {

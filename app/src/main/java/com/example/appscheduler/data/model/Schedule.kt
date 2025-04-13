@@ -7,17 +7,18 @@ import kotlinx.parcelize.Parcelize
 import java.util.UUID
 
 @Parcelize
-enum class ScheduleState(private val colorValue: Int): Parcelable {
-    NOT_EXECUTED(Color.Gray.value.toInt()),
-    SCHEDULED(Color.Blue.value.toInt()),
-    EXECUTED(Color.Green.value.toInt()),
-    CANCELLED(Color.Red.value.toInt());
+enum class ScheduleState(private val colorLong: ULong) : Parcelable {
+    NOT_SCHEDULED(Color.Gray.value),
+    SCHEDULED(Color.Blue.value),
+    EXECUTED(Color.Green.value),
+    CANCELLED(Color.Red.value);
+
     val color: Color
-        get() = Color(colorValue)
+        get() = Color(colorLong)
 
     companion object {
         fun fromColor(color: Color): ScheduleState? {
-            return entries.find { it.color == color }
+            return entries.find { it.color.value == color.value }
         }
     }
 }

@@ -12,7 +12,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.appscheduler.data.repository.AppListRepository
 import com.example.appscheduler.ui.screens.HomeScreen
 import com.example.appscheduler.ui.theme.AppSchedulerTheme
 import com.example.appscheduler.viewmodels.AppListViewModel
@@ -34,7 +33,7 @@ class MainActivity : ComponentActivity() {
                         .offset(y = 30.dp),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val appListViewModel = viewModel<AppListViewModel>(factory = ViewModelFactory(AppListRepository(this)))
+                    val appListViewModel = viewModel<AppListViewModel>(factory = ViewModelFactory(this))
                     val scheduleViewModel = viewModel<ScheduleViewModel>(factory = ViewModelFactory(this))
                     HomeScreen(appListViewModel, scheduleViewModel)
                 }
