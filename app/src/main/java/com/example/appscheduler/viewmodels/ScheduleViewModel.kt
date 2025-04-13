@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.appscheduler.data.model.Schedule
 import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.data.repository.AppStateRepository
+import com.example.appscheduler.data.repository.ScheduleRepository
 import com.example.appscheduler.receivers.AppLauncherReceiver
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
 import com.example.appscheduler.util.Constants.KEY_SCHEDULE
@@ -18,9 +19,6 @@ import com.example.appscheduler.util.Constants.TAG
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -29,8 +27,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
     private val gson = Gson()
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    private val _schedules = MutableStateFlow<List<Schedule>>(emptyList())
-    val schedules: StateFlow<List<Schedule>> = _schedules.asStateFlow()
+    private var schedules = emptyList<Schedule>()
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -42,10 +39,12 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
     private fun loadSchedules() {
         val json = sharedPreferences.getString(KEY_PREF_SCHEDULES, "") ?: ""
         val type = object : TypeToken<List<Schedule>>() {}.type
-        _schedules.value = gson.fromJson(json, type) ?: emptyList()
+        schedules = gson.fromJson(json, type) ?: emptyList()
 
-        _schedules.value.forEach { schedule ->
+        schedules.forEach { schedule ->
             println("$TAG -> ${schedule.packageName}    ${schedule.id}   ${Date(schedule.scheduledTime)}")
+            ScheduleRepository.putLatestSchedule(schedule.packageName, schedule)
+
             when (schedule.state) {
                 ScheduleState.SCHEDULED -> AppStateRepository.scheduleApp(schedule.packageName)
                 ScheduleState.EXECUTED -> AppStateRepository.markAsExecuted(schedule.packageName)
@@ -56,14 +55,14 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
     }
 
     private fun saveSchedules() {
-        val json = gson.toJson(_schedules.value)
+        val json = gson.toJson(schedules)
         sharedPreferences.edit().putString(KEY_PREF_SCHEDULES, json).apply()
     }
 
     fun scheduleApp(schedule: Schedule) {
         Log.i(TAG, "${schedule.packageName} is scheduled at ${Date(schedule.scheduledTime)}")
 
-        _schedules.value += schedule
+        schedules += schedule
         saveSchedules()
 
         val pendingIntent = getPendingIntent(schedule, true)
@@ -74,6 +73,19 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         )
 
         AppStateRepository.scheduleApp(schedule.packageName)
+        ScheduleRepository.putLatestSchedule(schedule.packageName, schedule)
+    }
+
+    fun cancelSchedule(schedule: Schedule?) {
+        val pendingIntent = getPendingIntent(schedule, false)
+        alarmManager.cancel(pendingIntent!!)
+
+        schedules = schedules.map {
+            if (it.packageName == schedule?.packageName) it.copy(state = ScheduleState.CANCELLED) else it
+        }
+
+        AppStateRepository.cancelSchedule(schedule?.packageName!!)
+        saveSchedules()
     }
 
     private fun getPendingIntent(

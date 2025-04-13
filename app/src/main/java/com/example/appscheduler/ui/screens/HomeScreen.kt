@@ -3,6 +3,7 @@ package com.example.appscheduler.ui.screens
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,7 +38,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.appscheduler.data.model.AppInfo
+import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.data.repository.AppStateRepository
+import com.example.appscheduler.data.repository.ScheduleRepository
 import com.example.appscheduler.util.Constants.TAG
 import com.example.appscheduler.viewmodels.AppListViewModel
 import com.example.appscheduler.viewmodels.ScheduleViewModel
@@ -75,6 +78,7 @@ fun HomeScreen(
                     selectedApp = app
                     showDialog = true
                 },
+                scheduleViewModel,
                 context
             )
         }
@@ -85,6 +89,7 @@ fun HomeScreen(
 fun AppCellItem(
     app: AppInfo,
     onScheduleClick: () -> Unit,
+    scheduleViewModel: ScheduleViewModel,
     context: Context,
     cornerAlignment: Alignment = Alignment.TopEnd,
     indicatorPadding: Dp = 4.dp
@@ -109,7 +114,7 @@ fun AppCellItem(
                         .align(cornerAlignment)
                         .padding(indicatorPadding)
                 ) {
-                    AppStateIndicator(packageName = app.packageName)
+                    AppStateIndicator(packageName = app.packageName, context, scheduleViewModel)
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
@@ -123,7 +128,7 @@ fun AppCellItem(
 }
 
 @Composable
-fun AppStateIndicator(packageName: String) {
+fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: ScheduleViewModel) {
     val appStates = AppStateRepository.appStates.collectAsState().value
     val appState = appStates[packageName]!!
     Log.i(TAG, "state: $appState for package: $packageName with color: ${appState.color}")
@@ -140,10 +145,22 @@ fun AppStateIndicator(packageName: String) {
                 color = MaterialTheme.colorScheme.surface,
                 shape = CircleShape
             )
+            .clickable {
+                onStateButtonClicked(appState, packageName, context, scheduleViewModel)
+            }
     )
 }
 
-fun onAppClicked(packageName: String, context: Context) {
+private fun onStateButtonClicked(appState: ScheduleState, packageName: String, context: Context, scheduleViewModel: ScheduleViewModel) {
+    if (appState != ScheduleState.SCHEDULED) {
+        Toast.makeText(context, "You can't cancel if app is not scheduled.", Toast.LENGTH_SHORT).show()
+        return
+    }
+    Toast.makeText(context, "Schedule canceled", Toast.LENGTH_SHORT).show()
+    scheduleViewModel.cancelSchedule(ScheduleRepository.getLatestSchedule(packageName))
+}
+
+private fun onAppClicked(packageName: String, context: Context) {
     val pm = context.packageManager
     val launchIntent = pm.getLaunchIntentForPackage(packageName)
     if (launchIntent != null) {
