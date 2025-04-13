@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.appscheduler.data.model.AppInfo
 import com.example.appscheduler.data.model.Schedule
+import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.viewmodels.ScheduleViewModel
 import java.util.Calendar
 
@@ -77,6 +78,7 @@ fun ScheduleDialog(
                         val schedule = Schedule(
                             packageName = app.packageName,
                             scheduledTime = selectedTime,
+                            state = ScheduleState.SCHEDULED
                         )
                         viewModel.scheduleApp(schedule)
                         onDismiss()

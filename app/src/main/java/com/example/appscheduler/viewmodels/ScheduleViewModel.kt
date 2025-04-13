@@ -9,6 +9,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appscheduler.data.model.Schedule
+import com.example.appscheduler.data.model.ScheduleState
+import com.example.appscheduler.data.repository.AppStateRepository
 import com.example.appscheduler.receivers.AppLauncherReceiver
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
 import com.example.appscheduler.util.Constants.KEY_SCHEDULE
@@ -32,6 +34,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
+            AppStateRepository.initialize(context)
             loadSchedules()
         }
     }
@@ -42,13 +45,19 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         _schedules.value = gson.fromJson(json, type) ?: emptyList()
 
         _schedules.value.forEach { schedule ->
-            println("$TAG -> ${schedule.packageName}       ${schedule.id}")
+            println("$TAG -> ${schedule.packageName}    ${schedule.id}   ${Date(schedule.scheduledTime)}")
+            when (schedule.state) {
+                ScheduleState.SCHEDULED -> AppStateRepository.scheduleApp(schedule.packageName)
+                ScheduleState.EXECUTED -> AppStateRepository.markAsExecuted(schedule.packageName)
+                ScheduleState.CANCELLED -> AppStateRepository.cancelSchedule(schedule.packageName)
+                ScheduleState.NOT_SCHEDULED -> {}
+            }
         }
     }
 
     private fun saveSchedules() {
         val json = gson.toJson(_schedules.value)
-        sharedPreferences.edit().putString("schedules", json).apply()
+        sharedPreferences.edit().putString(KEY_PREF_SCHEDULES, json).apply()
     }
 
     fun scheduleApp(schedule: Schedule) {
@@ -63,6 +72,8 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
             schedule.scheduledTime,
             pendingIntent!!
         )
+
+        AppStateRepository.scheduleApp(schedule.packageName)
     }
 
     private fun getPendingIntent(

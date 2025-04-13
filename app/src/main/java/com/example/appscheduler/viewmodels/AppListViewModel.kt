@@ -1,5 +1,6 @@
 package com.example.appscheduler.viewmodels
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class AppListViewModel(private val repository: AppListRepository): ViewModel() {
+class AppListViewModel(private val context: Context): ViewModel() {
     private val _apps = MutableStateFlow<List<AppInfo>>(emptyList())
     val apps: StateFlow<List<AppInfo>> = _apps
 
@@ -20,7 +21,7 @@ class AppListViewModel(private val repository: AppListRepository): ViewModel() {
 
     private fun loadInstalledApps() {
         viewModelScope.launch {
-            _apps.value = repository.getInstalledApps()
+            _apps.value = AppListRepository.getInstalledApps(context)
             Log.i(TAG, "Number of installed apps: ${_apps.value.size}")
         }
     }

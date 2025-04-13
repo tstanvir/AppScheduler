@@ -9,8 +9,8 @@ import com.example.appscheduler.util.Constants.OWN_PACKAGE_NAME
 import java.util.Locale
 import kotlin.random.Random
 
-class AppListRepository(private val context: Context) {
-    fun getInstalledApps(): List<AppInfo> {
+object AppListRepository {
+    fun getInstalledApps(context: Context): List<AppInfo> {
         val packageManager = context.packageManager
         return packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
             .filter { app ->
