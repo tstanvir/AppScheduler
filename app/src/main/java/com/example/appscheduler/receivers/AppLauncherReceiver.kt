@@ -13,6 +13,7 @@ import com.example.appscheduler.data.model.Schedule
 import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.data.repository.AppStateRepository
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
+import com.example.appscheduler.util.Constants.KEY_SCHEDULE
 import com.example.appscheduler.util.Constants.NAME_PREF_SCHEDULE
 import com.example.appscheduler.util.Constants.TAG
 import com.google.gson.Gson
@@ -20,7 +21,7 @@ import com.google.gson.reflect.TypeToken
 
 class AppLauncherReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        val schedule = intent?.parcelable<Schedule>(NAME_PREF_SCHEDULE)
+        val schedule = intent?.parcelable<Schedule>(KEY_SCHEDULE)
         Log.i(TAG, "onReceive():: with package: ${schedule?.packageName}")
 
         launchTargetApp(context!!, schedule!!)

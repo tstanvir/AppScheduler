@@ -15,6 +15,7 @@ import com.example.appscheduler.data.repository.AppStateRepository
 import com.example.appscheduler.data.repository.ScheduleRepository
 import com.example.appscheduler.receivers.AppLauncherReceiver
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
+import com.example.appscheduler.util.Constants.KEY_SCHEDULE
 import com.example.appscheduler.util.Constants.NAME_PREF_SCHEDULE
 import com.example.appscheduler.util.Constants.TAG
 import com.google.gson.Gson
@@ -111,7 +112,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         var flags = PendingIntent.FLAG_IMMUTABLE
 
         if (toSchedule) {
-            intent.putExtra(NAME_PREF_SCHEDULE, schedule)
+            intent.putExtra(KEY_SCHEDULE, schedule)
             flags = flags or PendingIntent.FLAG_UPDATE_CURRENT
         }
 

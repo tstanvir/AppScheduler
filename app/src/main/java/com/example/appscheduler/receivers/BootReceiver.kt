@@ -10,6 +10,7 @@ import android.util.Log
 import com.example.appscheduler.data.model.Schedule
 import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
+import com.example.appscheduler.util.Constants.KEY_SCHEDULE
 import com.example.appscheduler.util.Constants.NAME_PREF_SCHEDULE
 import com.example.appscheduler.util.Constants.TAG
 import com.google.gson.Gson
@@ -41,7 +42,7 @@ class BootReceiver : BroadcastReceiver() {
 
                         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
                         val alarmIntent = Intent(context, AppLauncherReceiver::class.java).apply {
-                            putExtra(NAME_PREF_SCHEDULE, schedule)
+                            putExtra(KEY_SCHEDULE, schedule)
                         }
                         val pendingIntent = PendingIntent.getBroadcast(
                             context,
