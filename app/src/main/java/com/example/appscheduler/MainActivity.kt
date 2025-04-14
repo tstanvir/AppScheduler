@@ -33,8 +33,8 @@ class MainActivity : ComponentActivity() {
                         .offset(y = 30.dp),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val appListViewModel = viewModel<AppListViewModel>(factory = ViewModelFactory(this))
-                    val scheduleViewModel = viewModel<ScheduleViewModel>(factory = ViewModelFactory(this))
+                    val appListViewModel = viewModel<AppListViewModel>(factory = ViewModelFactory(applicationContext))
+                    val scheduleViewModel = viewModel<ScheduleViewModel>(factory = ViewModelFactory(applicationContext))
                     HomeScreen(appListViewModel, scheduleViewModel)
                 }
             }
