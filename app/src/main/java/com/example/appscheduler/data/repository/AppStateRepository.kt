@@ -2,12 +2,9 @@ package com.example.appscheduler.data.repository
 
 import android.content.Context
 import com.example.appscheduler.data.model.ScheduleState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 object AppStateRepository {
     private val _appStates = MutableStateFlow<MutableMap<String, ScheduleState>>(mutableMapOf())
@@ -15,20 +12,13 @@ object AppStateRepository {
     var appStatesChanged = MutableStateFlow(0)
         private set
 
-    private var isInitialized = false
-
     @Synchronized
     fun initialize(context: Context) {
-        if (isInitialized) return
-
-        CoroutineScope(Dispatchers.IO).launch {
-            val apps = AppListRepository.getInstalledApps(context)
-            apps.forEach { app ->
-                _appStates.value[app.packageName] = ScheduleState.NOT_SCHEDULED
-            }
-            appStatesChanged.value = appStatesChanged.value xor 1
-            isInitialized = true
+        val apps = AppListRepository.getInstalledApps(context)
+        apps.forEach { app ->
+            _appStates.value[app.packageName] = ScheduleState.NOT_SCHEDULED
         }
+        appStatesChanged.value = appStatesChanged.value xor 1
     }
 
     @Synchronized
