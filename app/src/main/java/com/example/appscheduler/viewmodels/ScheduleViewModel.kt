@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appscheduler.data.model.Schedule
@@ -59,13 +60,16 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         sharedPreferences.edit().putString(KEY_PREF_SCHEDULES, json).apply()
     }
 
-    fun scheduleApp(schedule: Schedule) {
+    fun scheduleApp(schedule: Schedule): Boolean {
         Log.i(TAG, "${schedule.packageName} is scheduled at ${Date(schedule.scheduledTime)}")
+        if (isConflict(schedule)) {
+            Toast.makeText(context, "You have already a schedule at time ${Date(schedule.scheduledTime)}", Toast.LENGTH_LONG).show()
+            return false
+        }
+
         if (AppStateRepository.appStates.value[schedule.packageName] == ScheduleState.SCHEDULED) {
             cancelSchedule(ScheduleRepository.getLatestSchedule(schedule.packageName))
         }
-        schedules += schedule
-        saveSchedules()
 
         val pendingIntent = getPendingIntent(schedule, true)
         alarmManager.setExactAndAllowWhileIdle(
@@ -74,8 +78,17 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
             pendingIntent!!
         )
 
+        schedules += schedule
+        saveSchedules()
         AppStateRepository.scheduleApp(schedule.packageName)
         ScheduleRepository.putLatestSchedule(schedule.packageName, schedule)
+        return true
+    }
+
+    private fun isConflict(schedule: Schedule): Boolean {
+        return schedules.any {
+            it.scheduledTime == schedule.scheduledTime && AppStateRepository.appStates.value[it.packageName] == ScheduleState.SCHEDULED
+        }
     }
 
     fun cancelSchedule(schedule: Schedule?) {

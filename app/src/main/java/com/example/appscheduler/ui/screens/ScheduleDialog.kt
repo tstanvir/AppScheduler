@@ -78,15 +78,16 @@ fun ScheduleDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        if (AppStateRepository.appStates.value[app.packageName] == ScheduleState.SCHEDULED) {
-                            Toast.makeText(context, "Schedule updated at ${Date(selectedTime)}", Toast.LENGTH_SHORT).show()
-                        }
                         val schedule = Schedule(
                             packageName = app.packageName,
                             scheduledTime = selectedTime,
                             state = ScheduleState.SCHEDULED
                         )
-                        viewModel.scheduleApp(schedule)
+                        val prevState = AppStateRepository.appStates.value[app.packageName]
+                        val scheduleDone = viewModel.scheduleApp(schedule)
+                        if (prevState == ScheduleState.SCHEDULED && scheduleDone) {
+                            Toast.makeText(context, "Schedule updated at ${Date(selectedTime)}", Toast.LENGTH_SHORT).show()
+                        }
                         onDismiss()
                     },
                     modifier = Modifier.fillMaxWidth()
