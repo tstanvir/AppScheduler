@@ -16,6 +16,7 @@ import com.example.appscheduler.data.repository.ScheduleRepository
 import com.example.appscheduler.receivers.AppLauncherReceiver
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
 import com.example.appscheduler.util.Constants.KEY_SCHEDULE
+import com.example.appscheduler.util.Constants.NAME_PREF_SCHEDULE
 import com.example.appscheduler.util.Constants.TAG
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -24,7 +25,7 @@ import kotlinx.coroutines.launch
 import java.util.Date
 
 class ScheduleViewModel(private val context: Context): ViewModel() {
-    private val sharedPreferences = context.getSharedPreferences(KEY_SCHEDULE, MODE_PRIVATE)
+    private val sharedPreferences = context.getSharedPreferences(NAME_PREF_SCHEDULE, MODE_PRIVATE)
     private val gson = Gson()
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -43,7 +44,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         schedules = gson.fromJson(json, type) ?: emptyList()
 
         schedules.forEach { schedule ->
-            println("$TAG -> $schedule")
+            Log.i(TAG, "$schedule at ${Date(schedule.scheduledTime)}")
             ScheduleRepository.putLatestSchedule(schedule.packageName, schedule)
 
             when (schedule.state) {
@@ -61,7 +62,6 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
     }
 
     fun scheduleApp(schedule: Schedule): Boolean {
-        Log.i(TAG, "${schedule.packageName} is scheduled at ${Date(schedule.scheduledTime)}")
         if (isConflict(schedule)) {
             Toast.makeText(context, "You have already a schedule at time ${Date(schedule.scheduledTime)}", Toast.LENGTH_LONG).show()
             return false
@@ -82,6 +82,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         saveSchedules()
         AppStateRepository.scheduleApp(schedule.packageName)
         ScheduleRepository.putLatestSchedule(schedule.packageName, schedule)
+        Log.i(TAG, "${schedule.packageName} is scheduled at ${Date(schedule.scheduledTime)}")
         return true
     }
 
@@ -111,7 +112,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         var flags = PendingIntent.FLAG_IMMUTABLE
 
         if (toSchedule) {
-            intent.putExtra("schedule", schedule)
+            intent.putExtra(KEY_SCHEDULE, schedule)
             flags = flags or PendingIntent.FLAG_UPDATE_CURRENT
         }
 

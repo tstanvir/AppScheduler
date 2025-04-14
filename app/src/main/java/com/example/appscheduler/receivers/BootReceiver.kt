@@ -11,12 +11,14 @@ import com.example.appscheduler.data.model.Schedule
 import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
 import com.example.appscheduler.util.Constants.KEY_SCHEDULE
+import com.example.appscheduler.util.Constants.NAME_PREF_SCHEDULE
 import com.example.appscheduler.util.Constants.TAG
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Date
 
 class BootReceiver : BroadcastReceiver() {
 
@@ -25,7 +27,7 @@ class BootReceiver : BroadcastReceiver() {
 
         if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
             CoroutineScope(Dispatchers.IO).launch {
-                val sharedPreferences = context.getSharedPreferences(KEY_SCHEDULE, MODE_PRIVATE)
+                val sharedPreferences = context.getSharedPreferences(NAME_PREF_SCHEDULE, MODE_PRIVATE)
                 val gson = Gson()
 
                 val json = sharedPreferences.getString(KEY_PREF_SCHEDULES, "") ?: ""
@@ -36,7 +38,7 @@ class BootReceiver : BroadcastReceiver() {
                 schedules
                     .filter { it.state == ScheduleState.SCHEDULED }
                     .forEach { schedule ->
-                        println("$TAG -> $schedule")
+                        Log.i(TAG, "$schedule at ${Date(schedule.scheduledTime)}")
 
                         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
                         val alarmIntent = Intent(context, AppLauncherReceiver::class.java).apply {
