@@ -25,4 +25,8 @@ class AppListViewModel(private val context: Context): ViewModel() {
             Log.i(TAG, "Number of installed apps: ${_apps.value.size}")
         }
     }
+
+    fun refresh() {
+        loadInstalledApps()
+    }
 }
