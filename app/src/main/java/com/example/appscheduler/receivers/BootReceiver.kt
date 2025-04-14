@@ -36,7 +36,7 @@ class BootReceiver : BroadcastReceiver() {
                 schedules
                     .filter { it.state == ScheduleState.SCHEDULED }
                     .forEach { schedule ->
-                        println("$TAG -> ${schedule.packageName}   ${schedule.id}")
+                        println("$TAG -> $schedule")
 
                         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
                         val alarmIntent = Intent(context, AppLauncherReceiver::class.java).apply {
