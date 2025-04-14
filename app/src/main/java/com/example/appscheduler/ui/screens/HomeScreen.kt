@@ -143,7 +143,12 @@ fun AppCellItem(
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(modifier = Modifier.height(4.dp))
-            AppStateIndicator(packageName = app.packageName, context, scheduleViewModel, onScheduleClick)
+            AppStateIndicator(
+                packageName = app.packageName,
+                context,
+                scheduleViewModel,
+                onScheduleClick
+            )
         }
     }
 }
@@ -182,7 +187,11 @@ fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: 
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
                 .clickable {
-                    onStateButtonClicked(appState, packageName, context, scheduleViewModel, onScheduleClick)
+                    onStateButtonClicked(appState,
+                        packageName,
+                        context,
+                        scheduleViewModel,
+                        onScheduleClick)
                 },
             contentAlignment = Alignment.Center
         ) {

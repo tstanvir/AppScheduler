@@ -13,14 +13,14 @@ import com.example.appscheduler.data.model.Schedule
 import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.data.repository.AppStateRepository
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
-import com.example.appscheduler.util.Constants.KEY_SCHEDULE
+import com.example.appscheduler.util.Constants.NAME_PREF_SCHEDULE
 import com.example.appscheduler.util.Constants.TAG
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 class AppLauncherReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        val schedule = intent?.parcelable<Schedule>(KEY_SCHEDULE)
+        val schedule = intent?.parcelable<Schedule>(NAME_PREF_SCHEDULE)
         Log.i(TAG, "onReceive():: with package: ${schedule?.packageName}")
 
         launchTargetApp(context!!, schedule!!)
@@ -58,7 +58,7 @@ class AppLauncherReceiver : BroadcastReceiver() {
     }
 
     private fun updateSharedPref(context: Context, scheduleId: String) {
-        val sharedPreferences = context.getSharedPreferences(KEY_SCHEDULE, MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(NAME_PREF_SCHEDULE, MODE_PRIVATE)
         val gson = Gson()
         val json = sharedPreferences.getString(KEY_PREF_SCHEDULES, "") ?: ""
         val type = object : TypeToken<List<Schedule>>() {}.type
