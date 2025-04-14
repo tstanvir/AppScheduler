@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.appscheduler.ui.screens.HomeScreen
 import com.example.appscheduler.ui.theme.AppSchedulerTheme
 import com.example.appscheduler.viewmodels.AppListViewModel
@@ -18,10 +18,14 @@ import com.example.appscheduler.viewmodels.ViewModelFactory
 
 
 class MainActivity : ComponentActivity() {
+    private lateinit var appListViewModel: AppListViewModel
+    private lateinit var scheduleViewModel: ScheduleViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         checkOverlayPermission()
+        appListViewModel = ViewModelProvider(this, ViewModelFactory(applicationContext))[AppListViewModel::class.java]
+        scheduleViewModel = ViewModelProvider(this, ViewModelFactory(applicationContext))[ScheduleViewModel::class.java]
 
         setContent {
             AppSchedulerTheme {
@@ -30,12 +34,15 @@ class MainActivity : ComponentActivity() {
                         .fillMaxWidth(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val appListViewModel = viewModel<AppListViewModel>(factory = ViewModelFactory(applicationContext))
-                    val scheduleViewModel = viewModel<ScheduleViewModel>(factory = ViewModelFactory(applicationContext))
                     HomeScreen(appListViewModel, scheduleViewModel)
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        appListViewModel.refresh()
     }
 
     private fun checkOverlayPermission() {
