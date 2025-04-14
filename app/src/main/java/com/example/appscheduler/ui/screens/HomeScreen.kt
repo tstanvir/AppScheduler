@@ -21,8 +21,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -37,15 +37,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
-import com.example.appscheduler.R
 import com.example.appscheduler.data.model.AppInfo
 import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.data.repository.AppStateRepository
@@ -119,9 +118,7 @@ fun AppCellItem(
     app: AppInfo,
     onScheduleClick: () -> Unit,
     scheduleViewModel: ScheduleViewModel,
-    context: Context,
-    cornerAlignment: Alignment = Alignment.TopEnd,
-    indicatorPadding: Dp = 4.dp
+    context: Context
 ) {
     Column(
         modifier = Modifier
@@ -138,21 +135,15 @@ fun AppCellItem(
                         .size(48.dp)
                         .clickable { onAppClicked(app.packageName, context) }
                 )
-
-                Box(
-                    modifier = Modifier
-                        .align(cornerAlignment)
-                        .padding(indicatorPadding)
-                ) {
-                    AppStateIndicator(packageName = app.packageName, context, scheduleViewModel)
-                }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            TextCompose(text = app.name)
+            Text(
+                app.name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             Spacer(modifier = Modifier.height(4.dp))
-            Button(onClick = onScheduleClick) {
-                TextCompose(text = stringResource(R.string.schedule))
-            }
+            AppStateIndicator(packageName = app.packageName, context, scheduleViewModel, onScheduleClick)
         }
     }
 }
@@ -160,42 +151,58 @@ fun AppCellItem(
 @Composable
 fun TextCompose(text: String) {
     Text(
+        color = Color.Black,
         text = text,
         fontSize = 12.sp,
         maxLines = 1,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
+        fontWeight = FontWeight.Bold
     )
 }
 
 @Composable
-fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: ScheduleViewModel) {
+fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: ScheduleViewModel, onScheduleClick: () -> Unit) {
     val appStateChangeListener = AppStateRepository.appStatesChanged.collectAsState().value
 
     val appStates = AppStateRepository.appStates.collectAsState().value
     val appState = appStates[packageName]!!
     Log.i(TAG, "state: $appState for package: $packageName with color: ${appState.color}")
 
-    Box(
-        modifier = Modifier
-            .size(16.dp)
-            .background(
-                color = appState.color,
-                shape = CircleShape
-            )
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = CircleShape
-            )
-            .clickable {
-                onStateButtonClicked(appState, packageName, context, scheduleViewModel)
-            }
-    )
+    Card (
+        shape = RoundedCornerShape(50.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(100.dp, 40.dp)
+                .background(
+                    color = appState.color
+                )
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+                .clickable {
+                    onStateButtonClicked(appState, packageName, context, scheduleViewModel, onScheduleClick)
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            val text = getStatusText(appState)
+            TextCompose(text)
+        }
+    }
 }
 
-private fun onStateButtonClicked(appState: ScheduleState, packageName: String, context: Context, scheduleViewModel: ScheduleViewModel) {
+fun getStatusText(appState: ScheduleState): String {
+    return when (appState) {
+        ScheduleState.SCHEDULED -> "Cancel"
+        ScheduleState.NOT_SCHEDULED -> "Schedule"
+        else -> "ReSchedule"
+    }
+}
+
+private fun onStateButtonClicked(appState: ScheduleState, packageName: String, context: Context, scheduleViewModel: ScheduleViewModel, onScheduleClick: () -> Unit) {
     if (appState != ScheduleState.SCHEDULED) {
-        Toast.makeText(context, "You can't cancel if app is not scheduled.", Toast.LENGTH_SHORT).show()
+        onScheduleClick()
         return
     }
     Toast.makeText(context, "Schedule canceled", Toast.LENGTH_SHORT).show()
