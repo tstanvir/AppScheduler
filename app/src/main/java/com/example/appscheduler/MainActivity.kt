@@ -6,11 +6,9 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appscheduler.ui.screens.HomeScreen
 import com.example.appscheduler.ui.theme.AppSchedulerTheme
@@ -29,8 +27,7 @@ class MainActivity : ComponentActivity() {
             AppSchedulerTheme {
                 Surface(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .offset(y = 30.dp),
+                        .fillMaxWidth(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val appListViewModel = viewModel<AppListViewModel>(factory = ViewModelFactory(applicationContext))

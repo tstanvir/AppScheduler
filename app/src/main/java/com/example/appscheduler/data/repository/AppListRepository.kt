@@ -35,7 +35,7 @@ object AppListRepository {
         val name = when {
             label.contains(ANDROID_SPECIFIC_APP) -> ANDROID_SPECIFIC_APP.plus(Random.nextInt(1000))
             label.containsMultipleWord() -> label.shortenedLabel()
-            label.length > 9 -> label.take(9).plus("...")
+            label.length > 14 -> label.take(9).plus("...")
             else -> label
         }
         return name
