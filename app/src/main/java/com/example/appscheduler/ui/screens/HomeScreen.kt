@@ -39,10 +39,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import com.example.appscheduler.R
 import com.example.appscheduler.data.model.AppInfo
 import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.data.repository.AppStateRepository
@@ -131,7 +134,8 @@ fun AppCellItem(
                 Image(
                     bitmap = app.icon.toBitmap().asImageBitmap(),
                     contentDescription = app.name,
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier
+                        .size(48.dp)
                         .clickable { onAppClicked(app.packageName, context) }
                 )
 
@@ -144,16 +148,23 @@ fun AppCellItem(
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = app.name,
-                fontSize = 16.sp,
-            )
+            TextCompose(text = app.name)
             Spacer(modifier = Modifier.height(4.dp))
             Button(onClick = onScheduleClick) {
-                Text(text = "Schedule")
+                TextCompose(text = stringResource(R.string.schedule))
             }
         }
     }
+}
+
+@Composable
+fun TextCompose(text: String) {
+    Text(
+        text = text,
+        fontSize = 12.sp,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
 }
 
 @Composable
