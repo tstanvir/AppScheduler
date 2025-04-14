@@ -3,7 +3,7 @@ package com.example.appscheduler.data.repository
 import com.example.appscheduler.data.model.Schedule
 
 object ScheduleRepository {
-    private var appScheduleMap = emptyMap<String, Schedule>()
+    private var appScheduleMap = mutableMapOf<String, Schedule>()
 
     @Synchronized
     fun getLatestSchedule(packageName: String): Schedule? {
@@ -12,8 +12,6 @@ object ScheduleRepository {
 
     @Synchronized
     fun putLatestSchedule(packageName: String, schedule: Schedule) {
-        appScheduleMap = appScheduleMap.toMutableMap().apply {
-            put(packageName, schedule)
-        }
+        appScheduleMap[packageName] = schedule
     }
 }

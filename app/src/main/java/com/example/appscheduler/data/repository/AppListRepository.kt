@@ -10,6 +10,7 @@ import java.util.Locale
 import kotlin.random.Random
 
 object AppListRepository {
+    @Synchronized
     fun getInstalledApps(context: Context): List<AppInfo> {
         val packageManager = context.packageManager
         return packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
@@ -35,7 +36,6 @@ object AppListRepository {
         val name = when {
             label.contains(ANDROID_SPECIFIC_APP) -> ANDROID_SPECIFIC_APP.plus(Random.nextInt(1000))
             label.containsMultipleWord() -> label.shortenedLabel()
-            label.length > 14 -> label.take(9).plus("...")
             else -> label
         }
         return name
