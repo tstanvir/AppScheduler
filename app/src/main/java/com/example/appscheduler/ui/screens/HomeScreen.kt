@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,8 +23,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,6 +41,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import com.example.appscheduler.data.model.AppInfo
 import com.example.appscheduler.data.model.ScheduleState
@@ -45,6 +51,7 @@ import com.example.appscheduler.util.Constants.TAG
 import com.example.appscheduler.viewmodels.AppListViewModel
 import com.example.appscheduler.viewmodels.ScheduleViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     appListViewModel: AppListViewModel,
@@ -63,24 +70,43 @@ fun HomeScreen(
         )
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(8.dp)
-    ) {
-        items(
-            items = installedApps,
-            key = { app -> app.packageName }
-        ) { app ->
-            AppCellItem(
-                app = app,
-                onScheduleClick = {
-                    selectedApp = app
-                    showDialog = true
-                },
-                scheduleViewModel,
-                context
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("App Scheduler") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
+        }
+    ) { paddingValues ->
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding() + 8.dp,
+                bottom = paddingValues.calculateBottomPadding() + 8.dp,
+                start = 16.dp,
+                end = 16.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(
+                items = installedApps,
+                key = { app -> app.packageName }
+            ) { app ->
+                AppCellItem(
+                    app = app,
+                    onScheduleClick = {
+                        selectedApp = app
+                        showDialog = true
+                    },
+                    scheduleViewModel,
+                    context
+                )
+            }
         }
     }
 }
@@ -118,7 +144,10 @@ fun AppCellItem(
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = app.name)
+            Text(
+                text = app.name,
+                fontSize = 16.sp,
+            )
             Spacer(modifier = Modifier.height(4.dp))
             Button(onClick = onScheduleClick) {
                 Text(text = "Schedule")
@@ -142,7 +171,7 @@ fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: 
             )
             .border(
                 width = 1.dp,
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.outlineVariant,
                 shape = CircleShape
             )
             .clickable {
