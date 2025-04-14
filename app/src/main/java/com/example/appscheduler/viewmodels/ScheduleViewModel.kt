@@ -43,7 +43,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         schedules = gson.fromJson(json, type) ?: emptyList()
 
         schedules.forEach { schedule ->
-            println("$TAG -> ${schedule.packageName}    ${schedule.id}   ${Date(schedule.scheduledTime)}")
+            println("$TAG -> $schedule")
             ScheduleRepository.putLatestSchedule(schedule.packageName, schedule)
 
             when (schedule.state) {

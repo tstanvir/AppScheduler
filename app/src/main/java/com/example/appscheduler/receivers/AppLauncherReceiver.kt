@@ -43,7 +43,7 @@ class AppLauncherReceiver : BroadcastReceiver() {
             if (launchIntent != null) {
                 context.startActivity(launchIntent)
                 updateSharedPref(context, schedule.id)
-                updateAppState(context, schedule.packageName)
+                updateAppState(schedule.packageName)
             } else {
                 Log.e(TAG, "No launch intent available for: $schedule.packageName")
             }
@@ -52,8 +52,7 @@ class AppLauncherReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun updateAppState(context: Context, packageName: String) {
-        AppStateRepository.initialize(context)
+    private fun updateAppState(packageName: String) {
         AppStateRepository.markAsExecuted(packageName)
     }
 
