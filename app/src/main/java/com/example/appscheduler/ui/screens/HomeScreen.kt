@@ -12,18 +12,24 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -158,10 +164,19 @@ fun TextCompose(text: String) {
     Text(
         color = Color.Black,
         text = text,
-        fontSize = 12.sp,
+        fontSize = 10.sp,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         fontWeight = FontWeight.Bold
+    )
+}
+
+@Composable
+fun CancelIcon() {
+    Icon(
+        modifier = Modifier.border(1.dp, Color.Black),
+        imageVector = Icons.Filled.Close,
+        contentDescription = "Cancel"
     )
 }
 
@@ -176,46 +191,59 @@ fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: 
     Card (
         shape = RoundedCornerShape(50.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(100.dp, 40.dp)
-                .background(
-                    color = appState.color
-                )
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant
-                )
-                .clickable {
-                    onStateButtonClicked(appState,
-                        packageName,
-                        context,
-                        scheduleViewModel,
-                        onScheduleClick)
-                },
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.padding(1.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            val text = getStatusText(appState)
-            TextCompose(text)
+            var offsetX = 0
+            if (appState == ScheduleState.SCHEDULED) {
+                IconButton(
+                    onClick = {
+                        onCancelButtonClick(
+                            context,
+                            scheduleViewModel,
+                            packageName
+                        )
+                    }
+                ) {
+                    CancelIcon()
+                }
+                offsetX = -8;
+            }
+
+            Card (
+                modifier = Modifier.offset(x = offsetX.dp),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(80.dp, 30.dp)
+                        .background(
+                            color = appState.color
+                        )
+                        .clickable {
+                            onScheduleClick()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    val text = getStatusText(appState)
+                    TextCompose(text)
+                }
+            }
         }
     }
 }
 
+fun onCancelButtonClick(context: Context, scheduleViewModel: ScheduleViewModel, packageName: String) {
+    Toast.makeText(context, "Schedule canceled", Toast.LENGTH_SHORT).show()
+    scheduleViewModel.cancelSchedule(ScheduleRepository.getLatestSchedule(packageName))
+}
+
 fun getStatusText(appState: ScheduleState): String {
     return when (appState) {
-        ScheduleState.SCHEDULED -> "Cancel"
         ScheduleState.NOT_SCHEDULED -> "Schedule"
         else -> "ReSchedule"
     }
-}
-
-private fun onStateButtonClicked(appState: ScheduleState, packageName: String, context: Context, scheduleViewModel: ScheduleViewModel, onScheduleClick: () -> Unit) {
-    if (appState != ScheduleState.SCHEDULED) {
-        onScheduleClick()
-        return
-    }
-    Toast.makeText(context, "Schedule canceled", Toast.LENGTH_SHORT).show()
-    scheduleViewModel.cancelSchedule(ScheduleRepository.getLatestSchedule(packageName))
 }
 
 private fun onAppClicked(packageName: String, context: Context) {
