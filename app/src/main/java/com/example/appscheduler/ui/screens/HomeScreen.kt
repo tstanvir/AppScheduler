@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import androidx.navigation.NavController
 import com.example.appscheduler.data.model.AppInfo
 import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.data.repository.AppStateRepository
@@ -62,6 +63,7 @@ import com.example.appscheduler.viewmodels.ScheduleViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    navController: NavController,
     appListViewModel: AppListViewModel,
     scheduleViewModel: ScheduleViewModel
 ) {
@@ -112,7 +114,8 @@ fun HomeScreen(
                         showDialog = true
                     },
                     scheduleViewModel,
-                    context
+                    context,
+                    navController
                 )
             }
         }
@@ -124,8 +127,11 @@ fun AppCellItem(
     app: AppInfo,
     onScheduleClick: () -> Unit,
     scheduleViewModel: ScheduleViewModel,
-    context: Context
+    context: Context,
+    navController: NavController
 ) {
+    var showHistory by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .padding(8.dp)
@@ -155,6 +161,34 @@ fun AppCellItem(
                 scheduleViewModel,
                 onScheduleClick
             )
+            Spacer(modifier = Modifier.height(4.dp))
+            Card (
+                modifier = Modifier,
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Row(
+                    modifier = Modifier.size(80.dp, 30.dp)
+                        .clickable {
+                            showHistory = true
+                        }
+                        .background(color = Color.Cyan),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    TextCompose("Executions")
+                }
+            }
+
+            if (showHistory) {
+                val executedSchedules = ScheduleRepository.getAllExecutedScheduleOf(app.packageName);
+                if (executedSchedules.isEmpty()) {
+                    Toast.makeText(LocalContext.current, "You have no schedule executed for this app", Toast.LENGTH_LONG).show()
+                    showHistory = false
+                    return
+                }
+                navController.navigate("list/${app.packageName}")
+                showHistory = false
+            }
         }
     }
 }
@@ -193,7 +227,7 @@ fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: 
     ) {
         Row(
             modifier = Modifier.padding(1.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             var offsetX = 0
             if (appState == ScheduleState.SCHEDULED) {

@@ -8,8 +8,15 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.appscheduler.ui.screens.ExecutedHistoryScreen
 import com.example.appscheduler.ui.screens.HomeScreen
 import com.example.appscheduler.ui.theme.AppSchedulerTheme
 import com.example.appscheduler.viewmodels.AppListViewModel
@@ -34,7 +41,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxWidth(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen(appListViewModel, scheduleViewModel)
+                    AppNavigation()
                 }
             }
         }
@@ -49,6 +56,33 @@ class MainActivity : ComponentActivity() {
         if (!Settings.canDrawOverlays(this)) {
             val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
             startActivity(myIntent)
+        }
+    }
+
+    @Composable
+    fun AppNavigation() {
+        val navController = rememberNavController()
+
+        NavHost(navController = navController, startDestination = "main") {
+            composable("main") {
+                HomeScreen(
+                    navController,
+                    scheduleViewModel = scheduleViewModel,
+                    appListViewModel = appListViewModel
+                )
+            }
+            composable(
+                route = "list/{packageName}",
+                arguments = listOf(
+                    navArgument("packageName") {
+                        type = NavType.StringType
+                    }
+                )
+            ) {
+                backStackEntry ->
+                val packageName = backStackEntry.arguments?.getString("packageName") ?: ""
+                ExecutedHistoryScreen(packageName)
+            }
         }
     }
 }
