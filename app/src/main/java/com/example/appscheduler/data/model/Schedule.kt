@@ -1,13 +1,10 @@
 package com.example.appscheduler.data.model
 
-import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import com.google.gson.annotations.SerializedName
-import kotlinx.parcelize.Parcelize
 import java.util.UUID
 
-@Parcelize
-enum class ScheduleState(private val colorLong: ULong) : Parcelable {
+enum class ScheduleState(private val colorLong: ULong) {
     NOT_SCHEDULED(Color.Gray.value),
     SCHEDULED(Color.Blue.value),
     EXECUTED(Color.Green.value),
@@ -23,7 +20,6 @@ enum class ScheduleState(private val colorLong: ULong) : Parcelable {
     }
 }
 
-@Parcelize
 data class Schedule(
     val id: String = UUID.randomUUID().toString(),
     @SerializedName("package_name")
@@ -32,4 +28,4 @@ data class Schedule(
     val scheduledTime: Long,
     @SerializedName("state")
     var state: ScheduleState = ScheduleState.SCHEDULED
-) : Parcelable
+)

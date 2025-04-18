@@ -5,16 +5,14 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.TIRAMISU
-import android.os.Parcelable
 import android.util.Log
 import com.example.appscheduler.data.model.Schedule
 import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.data.repository.AppStateRepository
 import com.example.appscheduler.data.repository.ScheduleRepository
+import com.example.appscheduler.util.Constants.KEY_PACKAGE_NAME
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
-import com.example.appscheduler.util.Constants.KEY_SCHEDULE
+import com.example.appscheduler.util.Constants.KEY_SCHEDULE_ID
 import com.example.appscheduler.util.Constants.NAME_PREF_SCHEDULE
 import com.example.appscheduler.util.Constants.TAG
 import com.google.gson.Gson
@@ -22,21 +20,17 @@ import com.google.gson.reflect.TypeToken
 
 class AppLauncherReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
-        val schedule = intent?.parcelable<Schedule>(KEY_SCHEDULE)
-        Log.i(TAG, "onReceive():: with package: ${schedule?.packageName}")
+        val packageName = intent?.getStringExtra(KEY_PACKAGE_NAME)
+        val scheduleId = intent?.getStringExtra(KEY_SCHEDULE_ID)
+        Log.i(TAG, "onReceive():: with package: $packageName")
 
-        launchTargetApp(context!!, schedule!!)
+        launchTargetApp(context!!, packageName!!, scheduleId!!)
     }
 
-    private inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? = when {
-        SDK_INT >= TIRAMISU -> getParcelableExtra(key, T::class.java)
-        else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? T
-    }
-
-    private fun launchTargetApp(context: Context, schedule: Schedule) {
+    private fun launchTargetApp(context: Context, packageName: String, scheduleId: String) {
         try {
-            Log.i(TAG, "Attempting to launch app: ${schedule.packageName}")
-            val launchIntent = context.packageManager.getLaunchIntentForPackage(schedule.packageName)?.apply {
+            Log.i(TAG, "Attempting to launch app: $packageName")
+            val launchIntent = context.packageManager.getLaunchIntentForPackage(packageName)?.apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or
                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
                         Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
@@ -45,20 +39,19 @@ class AppLauncherReceiver : BroadcastReceiver() {
             if (launchIntent != null) {
                 context.startActivity(launchIntent)
             } else {
-                Log.e(TAG, "No launch intent available for: $schedule.packageName")
+                Log.e(TAG, "No launch intent available for: $packageName")
             }
 
-            updateAppState(context, schedule)
+            updateAppState(context, packageName, scheduleId)
         } catch (e: Exception) {
             Log.e(TAG, "Error launching app: ${e.message}")
         }
     }
 
-    private fun updateAppState(context: Context, schedule: Schedule) {
-        updateSharedPref(context, schedule.id)
-        AppStateRepository.markAsExecuted(schedule.packageName)
-        schedule.state = ScheduleState.EXECUTED
-        ScheduleRepository.updateSchedule(schedule, ScheduleState.EXECUTED)
+    private fun updateAppState(context: Context, packageName: String, scheduleId: String) {
+        updateSharedPref(context, scheduleId)
+        AppStateRepository.markAsExecuted(packageName)
+        ScheduleRepository.updateSchedule(packageName, scheduleId, ScheduleState.EXECUTED)
     }
 
     private fun updateSharedPref(context: Context, scheduleId: String) {
