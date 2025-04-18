@@ -20,14 +20,14 @@ object ScheduleRepository {
     }
 
     @Synchronized
-    fun updateSchedule(schedule: Schedule, state: ScheduleState) {
-        var schedules = appScheduleMap[schedule.packageName]
+    fun updateSchedule(packageName: String, scheduleId: String, state: ScheduleState) {
+        var schedules = appScheduleMap[packageName]
 
         schedules = schedules?.map {
-            if (it.id == schedule.id) it.copy(state = state) else it
+            if (it.id == scheduleId) it.copy(state = state) else it
         }?.toMutableList()
 
-        appScheduleMap[schedule.packageName] = schedules!!
+        appScheduleMap[packageName] = schedules!!
     }
 
     @Synchronized
