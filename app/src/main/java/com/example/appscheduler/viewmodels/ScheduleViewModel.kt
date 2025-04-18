@@ -45,7 +45,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
 
         schedules.forEach { schedule ->
             Log.i(TAG, "$schedule at ${Date(schedule.scheduledTime)}")
-            ScheduleRepository.putLatestSchedule(schedule.packageName, schedule)
+            ScheduleRepository.addSchedule(schedule.packageName, schedule)
 
             when (schedule.state) {
                 ScheduleState.SCHEDULED -> AppStateRepository.scheduleApp(schedule.packageName)
@@ -81,7 +81,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         schedules += schedule
         saveSchedules()
         AppStateRepository.scheduleApp(schedule.packageName)
-        ScheduleRepository.putLatestSchedule(schedule.packageName, schedule)
+        ScheduleRepository.addSchedule(schedule.packageName, schedule)
         Log.i(TAG, "${schedule.packageName} is scheduled at ${Date(schedule.scheduledTime)}")
         return true
     }
@@ -101,6 +101,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         }
 
         AppStateRepository.cancelSchedule(schedule?.packageName!!)
+        ScheduleRepository.updateSchedule(schedule, ScheduleState.CANCELLED)
         saveSchedules()
     }
 

@@ -12,6 +12,7 @@ import android.util.Log
 import com.example.appscheduler.data.model.Schedule
 import com.example.appscheduler.data.model.ScheduleState
 import com.example.appscheduler.data.repository.AppStateRepository
+import com.example.appscheduler.data.repository.ScheduleRepository
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
 import com.example.appscheduler.util.Constants.KEY_SCHEDULE
 import com.example.appscheduler.util.Constants.NAME_PREF_SCHEDULE
@@ -56,6 +57,8 @@ class AppLauncherReceiver : BroadcastReceiver() {
     private fun updateAppState(context: Context, schedule: Schedule) {
         updateSharedPref(context, schedule.id)
         AppStateRepository.markAsExecuted(schedule.packageName)
+        schedule.state = ScheduleState.EXECUTED
+        ScheduleRepository.updateSchedule(schedule, ScheduleState.EXECUTED)
     }
 
     private fun updateSharedPref(context: Context, scheduleId: String) {
