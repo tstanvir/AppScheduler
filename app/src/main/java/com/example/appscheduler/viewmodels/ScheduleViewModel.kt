@@ -18,6 +18,7 @@ import com.example.appscheduler.util.Constants.KEY_PACKAGE_NAME
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
 import com.example.appscheduler.util.Constants.KEY_SCHEDULE_ID
 import com.example.appscheduler.util.Constants.NAME_PREF_SCHEDULE
+import com.example.appscheduler.util.Constants.ONE_SECOND
 import com.example.appscheduler.util.Constants.TAG
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -64,8 +65,32 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
 
     fun scheduleApp(schedule: Schedule): Boolean {
         if (isConflict(schedule)) {
-            Toast.makeText(context, "You have already a schedule at time ${Date(schedule.scheduledTime)}", Toast.LENGTH_LONG).show()
-            return false
+            var offsetSlot = 0
+            var slotFound = false
+
+            val maxOffset = 55
+            val step = 5
+
+            val usedOffsets = schedules
+                .filter { it.state == ScheduleState.SCHEDULED && it.scheduledTime == schedule.scheduledTime }
+                .map { it.scheduledTimeOffset }
+                .sorted()
+
+            val availableOffset = (0..maxOffset step step)
+                .firstOrNull { it !in usedOffsets }
+
+            if (availableOffset != null) {
+                offsetSlot = availableOffset
+                slotFound = true
+            }
+
+            Log.i(TAG, "offsetSlot: $offsetSlot")
+            if (!slotFound) {
+                Toast.makeText(context, "${Date(schedule.scheduledTime)} has no slot available to schedule", Toast.LENGTH_LONG).show()
+                return false
+            }
+
+            schedule.scheduledTimeOffset = offsetSlot
         }
 
         if (AppStateRepository.appStates.value[schedule.packageName] == ScheduleState.SCHEDULED) {
@@ -75,7 +100,7 @@ class ScheduleViewModel(private val context: Context): ViewModel() {
         val pendingIntent = getPendingIntent(schedule, true)
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
-            schedule.scheduledTime,
+            schedule.scheduledTime + schedule.scheduledTimeOffset * ONE_SECOND,
             pendingIntent!!
         )
 

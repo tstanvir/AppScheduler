@@ -219,7 +219,7 @@ fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: 
     val appStateChangeListener = AppStateRepository.appStatesChanged.collectAsState().value
 
     val appStates = AppStateRepository.appStates.collectAsState().value
-    val appState = appStates[packageName]!!
+    val appState = appStates[packageName]?: ScheduleState.NOT_SCHEDULED
     Log.i(TAG, "state: $appState for package: $packageName with color: ${appState.color}")
 
     Card (

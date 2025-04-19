@@ -13,6 +13,7 @@ import com.example.appscheduler.util.Constants.KEY_PACKAGE_NAME
 import com.example.appscheduler.util.Constants.KEY_PREF_SCHEDULES
 import com.example.appscheduler.util.Constants.KEY_SCHEDULE_ID
 import com.example.appscheduler.util.Constants.NAME_PREF_SCHEDULE
+import com.example.appscheduler.util.Constants.ONE_SECOND
 import com.example.appscheduler.util.Constants.TAG
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -55,7 +56,7 @@ class BootReceiver : BroadcastReceiver() {
 
                     alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
-                        schedule.scheduledTime,
+                        schedule.scheduledTime + schedule.scheduledTimeOffset * ONE_SECOND,
                         pendingIntent
                     )
                 }
