@@ -8,4 +8,5 @@ object Constants {
     const val KEY_SCHEDULE_ID = "key_schedule_id"
     const val NAME_PREF_SCHEDULE = "schedule_pref"
     const val KEY_PREF_SCHEDULES = "schedules"
+    const val ONE_SECOND = 1000L
 }

@@ -26,6 +26,8 @@ data class Schedule(
     val packageName: String,
     @SerializedName("scheduled_time")
     val scheduledTime: Long,
+    @SerializedName("scheduled_time_offset")
+    var scheduledTimeOffset: Int,
     @SerializedName("state")
     var state: ScheduleState = ScheduleState.SCHEDULED
 )

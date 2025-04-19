@@ -8,7 +8,7 @@ Scheduler App allows users to schedule, manage, and track application executions
 
 - **Schedule Applications**: Set specific times for apps to execute
 - **Manage Schedules**: Cancel or modify existing schedules as needed
-- **Time Conflict Detection**: Get alerts when attempting to schedule two apps at the same time
+- **Time Conflict Detection**: Set at most 11 apps to execute at a specific time. Get alerts when attempting to schedule more than 11 apps at the same time
 - **Execution History**: View complete execution history for each application
 - **Visual Status Tracking**: Color-coded states make it easy to identify schedule status at a glance
 

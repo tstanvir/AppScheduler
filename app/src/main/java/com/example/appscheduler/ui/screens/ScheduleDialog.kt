@@ -83,7 +83,8 @@ fun ScheduleDialog(
                         val schedule = Schedule(
                             packageName = app.packageName,
                             scheduledTime = selectedTime,
-                            state = ScheduleState.SCHEDULED
+                            state = ScheduleState.SCHEDULED,
+                            scheduledTimeOffset = 0
                         )
                         val prevState = AppStateRepository.appStates.value[app.packageName]
                         val scheduleDone = viewModel.scheduleApp(schedule)
