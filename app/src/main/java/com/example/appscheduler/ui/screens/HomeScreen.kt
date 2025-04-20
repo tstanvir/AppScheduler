@@ -194,11 +194,11 @@ fun AppCellItem(
 }
 
 @Composable
-fun TextCompose(text: String) {
+fun TextCompose(text: String, fontSize: Int = 10) {
     Text(
         color = Color.Black,
         text = text,
-        fontSize = 10.sp,
+        fontSize = fontSize.sp,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         fontWeight = FontWeight.Bold
@@ -230,6 +230,7 @@ fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: 
             verticalAlignment = Alignment.CenterVertically
         ) {
             var offsetX = 0
+            var fontSize = 10
             if (appState == ScheduleState.SCHEDULED) {
                 IconButton(
                     onClick = {
@@ -242,7 +243,8 @@ fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: 
                 ) {
                     CancelIcon()
                 }
-                offsetX = -8;
+                offsetX = -10
+                fontSize = 8
             }
 
             Card (
@@ -261,7 +263,7 @@ fun AppStateIndicator(packageName: String, context: Context, scheduleViewModel: 
                     contentAlignment = Alignment.Center
                 ) {
                     val text = getStatusText(appState)
-                    TextCompose(text)
+                    TextCompose(text, fontSize)
                 }
             }
         }
